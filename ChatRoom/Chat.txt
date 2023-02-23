@@ -1,0 +1,25 @@
+PER MOSTRARE LA LISTA DEI GRUPPI SI UTILIZZANO LE SEGUENTI CLASSI:
+-ControllerListChat = classico controller che avvia i metodi
+-AdapterChat = permette di mostrare i gruppi attivi e cliccare(nome del gruppo e aprire la relativa chat). Utilizza:
+			-ChatDBEntity = dove sono salvati tutti i gruppi(Entità)
+			-ViewHolderChat = ordina la lista  
+-activity_listachat = activity che mostra la lista gruppi
+-item_chat = cardview che mostra il nome del gruppo. Viene mostrato all'interno dell activity_listachat
+
+
+PER MOSTRARE I MESSSAGGI ALL'INTERNO DEL GRUPPO SI UTILIZZANO LE SEGUENTI CLASSI:
+-ControllerListChat = solito controller
+-ViewModelFactoryMessaggio = riconosce chi ha inviato i messaggi (per mostrare il messaggio se è dell'utente o di un'altra persona nel gruppo)
+-AdapterMessaggio = per visualizzare i messaggi. Utilizza:
+			-ViewHolderMessaggio = mostra il fumetto del messaggio in base a se è stato inviato dall utente (sulla destra) o no(sx)
+						-item_container_received_message = activity fumetto ricezione
+						-item_container_sent_message = activity fumetto invio
+			-MessaggioDBEntity = dove sono salvate le informazioni del messaggio(Entità)
+
+ALTRO:
+-ChatDatabase = E' il db. Deve essere eliminato
+-OffsetDateTimeConverter = per convertire l'orario in modo da mostrarlo in java
+-ChatDao = da eliminare
+-MessaggioDao = da eliminare
+-ViewModelChat = 
+-ViewModelMessaggio =

@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+  serverc:
+    container_name: serverchat
+    build: 
+      context: ./chatserver
+      dockerfile: server.dockerfile 
+    ports:
+      - "17000:17000"
+    #Imposto il volume serverchatlso che deve essere sincronizzato con la cartella HelloWorld
+    volumes:
+      - serverchatlso:/HelloWorld/
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    # Parametri per rendere visibile lo standardinput e standardoutput.
+    stdin_open: true 
+    tty: true
+volumes:
+  serverchatlso:
+    external: true

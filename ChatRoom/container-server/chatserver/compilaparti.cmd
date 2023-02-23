@@ -1,0 +1,1 @@
+wsl.exe --exec bash compilaparti.sh 17000

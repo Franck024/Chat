@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.lso_chat" >
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application
+        android:name=".Application.Application.Chat_Main"
+        android:allowBackup="true"
+        android:label="ChatLso"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:usesCleartextTraffic="true" >
+
+        <activity
+            android:name=".Application.Activity.ControllerLogin"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".Application.Activity.ControllerStanzaChat"
+            android:windowSoftInputMode="stateVisible|adjustPan"
+            />
+        <activity android:name=".Application.Activity.ControllerListChat"
+            android:windowSoftInputMode="stateVisible|adjustPan"
+            />
+        <activity android:name=".Application.Activity.ControllerRegistrazione"
+            android:windowSoftInputMode="stateVisible|adjustPan"
+            />
+        <activity
+            android:name=".Application.Activity.PopupNuovogruppo"
+            android:theme="@style/AppTheme.PopMe" />
+        <activity android:name=".Application.Activity.ControllerCreazioneGruppo"
+            android:windowSoftInputMode="stateVisible|adjustPan"
+            />
+        <activity
+            android:name=".Application.Activity.PopupInfoGruppo"
+            android:theme="@style/AppTheme.PopMe" />
+        <activity
+            android:name=".Application.Activity.ControllerChat"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Application.Activity.CercaGruppi"
+            android:exported="false"
+            android:parentActivityName=".Application.Activity.ControllerListChat"
+            android:windowSoftInputMode="stateVisible|adjustPan"
+            >
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".Application.Activity.Richieste"
+            android:exported="false"
+            android:parentActivityName=".Application.Activity.ControllerListChat">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+    </application>
+
+</manifest>

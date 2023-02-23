@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rettangolo_colorato1"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/CodiceGruppo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/bottone_trasparente"
+        android:hint="Codice Gruppo"
+        android:textSize="20dp"
+        android:drawablePadding="5dp"
+        android:maxLength="10"
+        android:drawableStart="@drawable/custom_key_icon"
+        android:inputType="numberDecimal"
+        android:paddingVertical="5dp"
+        android:paddingHorizontal="15dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/btn_inviaCodGruppo"
+            android:layout_width="160dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/btn_blue"
+            android:text="Invia richiesta"
+            android:textColor="@color/white"
+            android:textStyle="normal"
+            android:layout_weight="0.5"
+            />
+        <Space
+            android:layout_width="6dp"
+            android:layout_height="1dp"></Space>
+    <Button
+        android:id="@+id/txtCreaGruppo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:width="160dp"
+        android:height="50dp"
+        android:layout_weight="0.5"
+        android:background="@drawable/bottone_verde"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"
+        android:textAllCaps="true"
+        android:text="Crea Gruppo"
+        android:textColor="@color/white"
+        android:textStyle="normal" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

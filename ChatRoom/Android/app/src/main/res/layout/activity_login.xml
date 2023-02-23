@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_login"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_animation"
+    android:scrollbarThumbHorizontal="@android:drawable/alert_dark_frame"
+    android:scrollbarThumbVertical="@android:drawable/alert_dark_frame"
+    android:visibility="visible"
+    tools:visibility="visible">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="40dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="229dp"
+                    android:layout_weight="5"
+                    app:srcCompat="@drawable/chatmetransp" />
+                <Space
+                    android:layout_width="40dp"
+                    android:layout_height="20dp"
+                        />
+                <EditText
+                    android:id="@+id/editTextUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bottone_trasparente"
+                    android:layout_margin="10dp"
+                    android:padding="20dp"
+                    android:textColorHint="@color/white"
+                    android:drawableLeft="@drawable/ic_baseline_person_outline_24"
+                    android:drawablePadding="6dip"
+                    android:paddingLeft="20dip"
+                    android:ems="10"
+                    android:hint="Username"
+                    android:inputType="textPersonName"
+                    android:paddingVertical="15dp"
+                    android:paddingStart="20dp"
+                    android:maxLength="10"
+                    android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+                    tools:ignore="Autofill,RtlSymmetry" />
+
+                <EditText
+                    android:id="@+id/editTextPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bottone_trasparente"
+                    android:layout_margin="10dp"
+                    android:padding="20dp"
+                    android:textColorHint="@color/white"
+                    android:drawablePadding="6dip"
+                    android:paddingLeft="20dip"
+                    android:drawableLeft="@drawable/ic_baseline_password_24"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:paddingVertical="15dp"
+                    android:paddingStart="20dp"
+                    tools:ignore="Autofill,RtlSymmetry" />
+
+                <Button
+                    android:id="@+id/btnLogin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/btn_blue"
+                    android:paddingVertical="15dp"
+                    android:text="Login"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+
+                <TextView
+                    android:id="@+id/textViewRegister"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:paddingVertical="10dp"
+                    android:text="Non hai un account?"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+
+
+                <TextView
+                    android:id="@+id/accesso_admin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:gravity="center"
+                    android:text="Accesso admin"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:visibility="gone" />
+
+        </LinearLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

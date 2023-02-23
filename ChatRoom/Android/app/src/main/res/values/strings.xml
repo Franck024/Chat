@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">NaTour21</string>
+    <string name="passwordrules">La password deve contenere minimo 5 caratteri e massimo 10 caratteri (A-Z, a-z, 0-9 e un carattere speciale tra @$!%*#?&amp;)</string>
+    <string name="usernamerules">L\'username deve essere lungo almeno 5 caratteri e massimo 10 caratteri, può contenere solo lettere e numeri.</string>
+</resources>
