@@ -15,6 +15,7 @@
         android:label="ChatLso"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:icon="@mipmap/icona_message"
         android:usesCleartextTraffic="true" >
 
         <activity

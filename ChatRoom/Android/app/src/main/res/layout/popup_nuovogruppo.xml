@@ -5,60 +5,67 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/rettangolo_colorato1"
+    android:paddingHorizontal="20dp"
     android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/CodiceGruppo"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/CodiceGruppo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bottone_trasparente"
+            android:drawableStart="@drawable/custom_key_icon"
+            android:layout_marginTop="15dp"
+            android:drawablePadding="5dp"
+            android:hint="Codice Gruppo"
+            android:inputType="numberDecimal"
+            android:maxLength="10"
+            android:paddingHorizontal="15dp"
+            android:paddingVertical="5dp"
+            android:textSize="20dp"
+            android:textColorHint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="40dp"
-        android:background="@drawable/bottone_trasparente"
-        android:hint="Codice Gruppo"
-        android:textSize="20dp"
-        android:drawablePadding="5dp"
-        android:maxLength="10"
-        android:drawableStart="@drawable/custom_key_icon"
-        android:inputType="numberDecimal"
-        android:paddingVertical="5dp"
-        android:paddingHorizontal="15dp" />
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
         android:orientation="horizontal">
+
         <Button
             android:id="@+id/btn_inviaCodGruppo"
-            android:layout_width="160dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="@drawable/btn_blue"
-            android:text="Invia richiesta"
+            android:text="Invia"
+            android:textColor="@color/white"
+            android:paddingHorizontal="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/txtCreaGruppo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bottone_verde"
+            android:text="Crea Gruppo"
+            android:textAllCaps="true"
             android:textColor="@color/white"
             android:textStyle="normal"
-            android:layout_weight="0.5"
-            />
-        <Space
-            android:layout_width="6dp"
-            android:layout_height="1dp"></Space>
-    <Button
-        android:id="@+id/txtCreaGruppo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:width="160dp"
-        android:height="50dp"
-        android:layout_weight="0.5"
-        android:background="@drawable/bottone_verde"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
-        android:textAllCaps="true"
-        android:text="Crea Gruppo"
-        android:textColor="@color/white"
-        android:textStyle="normal" />
+            android:paddingHorizontal="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

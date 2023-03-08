@@ -3,20 +3,46 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingRight="30dp"
     android:paddingBottom="8dp">
 
-    <TextView
-        android:id="@+id/textViewMessaggioReceived"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constrMess"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bckgrd_recive_message"
-        android:padding="10dp"
-        android:textColor="@color/white"
-        android:textSize="15dp"
-        android:layout_marginLeft="5dp"
+        android:paddingLeft="5dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textNomeMittente"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:paddingTop="10dp"
+            android:text="aaaaaa"
+            android:textColor="#deb887"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.8" />
+
+        <TextView
+            android:id="@+id/textViewMessaggioReceived"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:paddingBottom="10dp"
+            android:text="prova messaggio aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textNomeMittente" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
     <TextView
@@ -27,6 +53,6 @@
         android:textSize="15dp"
         android:layout_marginLeft="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewMessaggioReceived" />
+        app:layout_constraintTop_toBottomOf="@+id/constrMess" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

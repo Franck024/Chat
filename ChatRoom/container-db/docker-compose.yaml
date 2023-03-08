@@ -9,6 +9,8 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: lso
+      TZ: 'Europe/Rome'
+      PGTZ: 'Europe/Rome'
     ports:
       - "5432:5432"
     logging:

@@ -8,11 +8,7 @@ import com.example.lso_chat.Application.Entities.Stanza;
 import com.example.lso_chat.Application.Entities.Utente;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
-
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -28,7 +24,7 @@ public class Controller {
     private Utente utente;
     private ControllerCreazioneGruppo creazioneGruppo;
     private Richieste activityRichieste;
-
+    private PopupInfoGruppo popupInfoGruppo;
 
 
 
@@ -83,6 +79,10 @@ public class Controller {
         this.clientSocket.mandaMessaggio(comando);
     }
 
+    public void recuperaPartecipanti(){
+        this.clientSocket.mandaMessaggio("retrieval_users");
+    }
+
     public void lasciaChat(){
         this.clientSocket.mandaMessaggio("leave_chat");
     }
@@ -130,7 +130,7 @@ public class Controller {
 
 
             if(!last_person.contentEquals("null")) {
-                LocalDateTime dateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
+                LocalDateTime dateTime = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
 
                 Log.d("ok", "Timestamp: " + timestamp);
@@ -140,7 +140,12 @@ public class Controller {
                 Stanza st = new Stanza(codice, nome,messaggio);
                 boolean ris=false;
                 for(Stanza ns: utente.getStanze()){
-                    if(ns.getCodice()==st.getCodice()){ris=true;}
+                    if(ns.getCodice()==st.getCodice()){ris=true;
+                        if(ns.getUltimo_msg()!=null){
+                        if(!ns.getUltimo_msg().equals(st.getUltimo_msg())){ns.setUltimo_msg(messaggio);}
+                        }
+                        else{ns.setUltimo_msg(messaggio);}
+                    }
                 }
                 if(ris==false){utente.addStanzaTop(st);}
             }
@@ -167,14 +172,19 @@ public class Controller {
             String corpo = stanze[i];
             String tempo_invio = stanze[++i];
             String nome_mittente = stanze[++i];
-            LocalDateTime dateTime = LocalDateTime.parse(tempo_invio, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
+            LocalDateTime dateTime = LocalDateTime.parse(tempo_invio, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             Utente mittente = new Utente(nome_mittente);
             Messaggio messaggio = new Messaggio(corpo,dateTime,mittente);
             lista.add(messaggio);
         }
 
-        //passa l'array all'activity
         controllerChat.setMessaggi(lista);
+    }
+
+    public void messaggioRicevuto(String nome_mittente,String corpo){
+        Utente mittente = new Utente(nome_mittente);
+        Messaggio messaggio = new Messaggio(corpo,LocalDateTime.now(),mittente);
+        controllerChat.messaggioricevuto(messaggio);
     }
 
 
@@ -210,9 +220,26 @@ public class Controller {
         this.clientSocket.mandaMessaggio(comando);
     }
 
-    public void entraInChat(){
-        controllerListChat.startActivity(new Intent(controllerListChat, ControllerChat.class));
+    public void inviaMessaggio(String corpo){
+        String comando="send_message".concat(" ").concat(corpo).concat("¶");
+        this.clientSocket.mandaMessaggio(comando);
     }
+
+    public void messaggioInviato(String corpo){
+        Log.d("ok","Sono in messaggioinviato, ed ho corpo: "+corpo);
+        Messaggio msg = new Messaggio(corpo,LocalDateTime.now(),utente);
+        controllerChat.messaggioricevuto(msg);
+    }
+
+    public void recuperoPartecipantiOK(String[] partecipanti){
+        ArrayList<String> listapartecipanti = new ArrayList<String>(Arrays.asList(partecipanti));
+        popupInfoGruppo.riempilista(listapartecipanti);
+    }
+
+    public void messaggioNonInviato(){
+        controllerChat.erroreInvio();
+    }
+
 
     public void utenteAggiunto(){
         activityRichieste.utenteAggiunto();
@@ -229,9 +256,9 @@ public class Controller {
 
     public void creaGruppo(String nomegruppo, ArrayList<String> lista){
         String comando = "create_chat_add_users";
-        comando = comando.concat(" ").concat(nomegruppo).concat(" ").concat("¶");
+        comando = comando.concat(" ").concat(nomegruppo).concat("¶");
         for(String stringa : lista){
-            comando=comando.concat(" ").concat(stringa);
+            comando=comando.concat(stringa).concat(" ");
         }
         Log.d("ok","al server sto mandando:"+comando);
         this.clientSocket.mandaMessaggio(comando);
@@ -275,7 +302,7 @@ public class Controller {
 
 
 
-    public synchronized void onSocketError(int tentativi_max){ //ignorate per il momento
+    public synchronized void onSocketError(int tentativi_max){
         int n_tentativo = 0;
         while(n_tentativo < tentativi_max){
             n_tentativo++;
@@ -290,7 +317,6 @@ public class Controller {
         }
         controllerlogin.startActivity(new Intent(controllerRegistrazione, ControllerLogin.class));
         controllerlogin.GenericError();
-        //Remind me metodo logout
         utente = null;
     }
 
@@ -301,6 +327,7 @@ public class Controller {
     public void setControllerChat(ControllerChat cChat){this.controllerChat = cChat;}
     public void setCreazioneGruppo(ControllerCreazioneGruppo creagruppo){this.creazioneGruppo = creagruppo;}
     public void setActivityRichieste(Richieste activityRichieste){this.activityRichieste = activityRichieste;}
+    public void setPopupInfoGruppo(PopupInfoGruppo popupInfoGruppo){this.popupInfoGruppo= popupInfoGruppo;}
 
 
 

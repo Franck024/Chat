@@ -47,14 +47,14 @@ public class ClientSocket {
                                     final String messaggio = in.readLine();
                                     if(messaggio == null){
                                         closeConnection();
-                                        //Controller.getIstanza().onSocketError(5);
+                                        Controller.getIstanza().onSocketError(5);
                                         break;
                                     }else{
                                         gestisciMessaggio(messaggio);
                                     }
                                 } catch (IOException e) {
                                     closeConnection();
-                                    //Controller.getIstanza().onSocketError(5);
+                                    Controller.getIstanza().onSocketError(5);
                                     break;
 
 
@@ -98,7 +98,7 @@ public class ClientSocket {
                     out.write(messaggio);
                     out.flush();
                 }else{
-                    //Controller.getIstanza().onSocketError(5);
+                    Controller.getIstanza().onSocketError(5);
 
                 }
             }
@@ -190,17 +190,23 @@ public class ClientSocket {
                 String[] messaggi = Arrays.copyOfRange(risposte_server, 1, risposte_server.length);
                 Controller.getIstanza().recuperaMessaggiOK(messaggi);
                 break;
-            case "no_message_found":
-                //Controller.getIstanza()
-                break;
             case "send_message_success":
-                //Controller.getIstanza()
+                String corpo = risposte_server[1];
+                Log.d("ok","Sono in send_message_success, con corpo "+corpo);
+                Controller.getIstanza().messaggioInviato(corpo);
                 break;
             case "send_message_failed":
-                //Controller.getIstanza()
+                Controller.getIstanza().messaggioNonInviato();
                 break;
-            case "invalid_request":
-                //boh
+            case "received_message":
+                String nome_mittente = risposte_server[1];
+                String msg_ricevuto = risposte_server[2];
+                Controller.getIstanza().messaggioRicevuto(nome_mittente,msg_ricevuto);
+                break;
+            case "retrieval_users_success":
+                String[] partecipanti = Arrays.copyOfRange(risposte_server, 1, risposte_server.length);
+                Controller.getIstanza().recuperoPartecipantiOK(partecipanti);
+                break;
             default:
                 break;
 

@@ -1,39 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingHorizontal="20dp"
-    android:paddingVertical="40dp"
-    android:background="@drawable/style_popup">
+    android:layout_height="300dp"
+    android:background="@drawable/rettangolo_colorato1"
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Codice gruppo:"
-        android:textColor="@color/black"
-        android:textSize="15dp"
+        android:layout_marginTop="10dp"
+        android:textAlignment="center"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/InfoCodiceGruppo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/btn_bordwhite"
-        android:paddingHorizontal="15dp"
-        android:paddingVertical="5dp"
-        android:text="CODICE GRUPPO"
-        android:textAlignment="center"
-        android:textSize="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        android:text="Lista Partecipanti:"
+        android:textColor="@color/white"
+        android:layout_marginBottom="10dp"
+        />
+
+            <ListView
+                android:id="@+id/listviewpartecipanti"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:divider="@null"
+                android:dividerHeight="0dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="10dp"
+                android:fadingEdge="horizontal"
+                android:fadingEdgeLength="30dp"
+                android:fillViewport="false"
+                android:requiresFadingEdge="vertical"/>
 
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

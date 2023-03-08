@@ -46,8 +46,10 @@ public class PopupNuovogruppo extends Activity {
         btnInviaRichiesta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controller.inviaRichiesta(CodiceGruppo.getText().toString());
-                finish();
+                if(!CodiceGruppo.getText().toString().isEmpty()) {
+                    controller.inviaRichiesta(CodiceGruppo.getText().toString());
+                    finish();
+                    }
             }
         });
     }

@@ -79,6 +79,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolderCh
                 Log.d("ok","hai selezionato la stanza"+listGruppi.get(position).getNome()+ "Con ID: "+listGruppi.get(position).getCodice());
                 Intent intent = new Intent(ctx, ControllerChat.class);
                 intent.putExtra("key",String.valueOf(listGruppi.get(position).getCodice()));
+                intent.putExtra("nomestanza",String.valueOf(listGruppi.get(position).getNome()));
 
                 ctx.startActivity(intent);
             }

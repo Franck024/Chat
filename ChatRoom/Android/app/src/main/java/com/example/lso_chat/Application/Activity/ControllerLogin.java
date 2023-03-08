@@ -57,11 +57,7 @@ public class ControllerLogin extends AppCompatActivity{
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onLoginClick(controller);   //  <----- commentare per saltare il controllo
-
-                /* Per testare saltando il login decommentare le due righe successive
-                Intent apriRegistrazione = new Intent (ControllerLogin.this, ControllerListChat.class);
-                startActivity(apriRegistrazione); */
+                onLoginClick(controller);  
 
             }
         });
@@ -105,7 +101,7 @@ public class ControllerLogin extends AppCompatActivity{
 
     public void LoginError(){
         runOnUiThread(()->{
-            Toast.makeText(this,"L'utente non esiste",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Dati errati.Riprovare",Toast.LENGTH_SHORT).show();
         });
 
     }

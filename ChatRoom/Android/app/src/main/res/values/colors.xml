@@ -25,4 +25,6 @@
     <color name="colorGradientStart">#FF2196F3</color>
     <color name="colorGradientCenter">#A0C3FC</color>
     <color name="colorGradientEnd">#38F8D4</color>
+    <color name="verdeacqua">#7fffd4</color>
+
 </resources>

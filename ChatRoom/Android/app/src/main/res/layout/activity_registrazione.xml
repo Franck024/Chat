@@ -10,37 +10,12 @@
     android:id="@+id/layout_registrazione">
 
 
-
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_marginTop="55dp"
         app:srcCompat="@drawable/signin" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_gravity="end">
-
-        <TextView
-            android:id="@+id/textViewCredentialRules"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/red_bord"
-            android:gravity="center_horizontal"
-            android:paddingHorizontal="20dp"
-            android:paddingVertical="5dp"
-            android:text=""
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@+id/editTextUsernameLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:ignore="HardcodedText" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editTextUsernameLayout"
@@ -141,17 +116,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
-            android:layout_marginBottom="150dp"
+            android:paddingVertical="10dp"
             android:background="@drawable/bottone_verde"
             android:text="Registrati"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             tools:ignore="HardcodedText" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

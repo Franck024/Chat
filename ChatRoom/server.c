@@ -16,8 +16,8 @@
 #define MAX_CONN 100
 #define MAX_CLIENT 30
 #define USER_LUN 20
-#define DIM_BUFF 1024
-#define NOME_CHAT 20
+#define DIM_BUFF 10240
+#define NOME_CHAT 30
 
 struct  Client{
   char username[USER_LUN];
@@ -46,7 +46,10 @@ void *handle_connection(void *);
 void rimuovi_client(struct Client *c);
 void aggiungi_client(struct Client *c);
 void manda_messaggio(char *msg,struct Client *c);
+void manda_messaggio_sistema(char *msg, struct Client *client);
 void retrieve_users_from_room(const char *room_name, struct Client *c);
+void recupera_partecipanti_connessi(int room_id, struct Client *client, char *buffer_query, char *buffer_out);
+void esci_stanza(struct Client *client);
 
 
 //////////////////MAIN//////////////////////////
@@ -103,7 +106,6 @@ int main(int argc, char** argv) {
     client_sd = accept(listen_sd, (struct sockaddr *) &client_addr, &client_len);
     if(client_sd < 0){
       perror("Errore funzione accept()");
-      continue;
     }
 
     printf("Nuova Connessione.\n");
@@ -112,9 +114,9 @@ int main(int argc, char** argv) {
     if(ret != 0){
       perror("Errore creazione thread");
     }
-    continue;
  
   }
+
   PQfinish(conn);
   return 0;
 
@@ -134,89 +136,104 @@ void *handle_connection(void *arg) {
 
 
   while(1) {
+   if (PQstatus(conn) != CONNECTION_OK) {
+    printf("Connessione al database persa, tentativo di riconnessione...\n");
+    PQreset(conn);
+
+    if (PQstatus(conn) != CONNECTION_OK) {
+      printf("Riconnessione al database fallita: %s\n", PQerrorMessage(conn));
+      exit(1);
+    }
+    printf("Riconnessione al database avvenuta con successo.\n");
+   }
 
     memset(buffer_in, 0, sizeof(buffer_in));
     memset(buffer_out, 0, sizeof(buffer_out));
     memset(buffer_query, 0, sizeof(buffer_query));
 
     int n = recv(client->sd, buffer_in, sizeof(buffer_in), 0);
+
     if (n <=0) {
-      /*fprintf(stderr,"Errore lettura da client: %s\n",strerror(errno));
-      close(client->sd);
-      pthread_exit(NULL);*/
       break;
     }
 
     char *request_type = strtok(buffer_in, " ");
-
+ //**********************************************************************LOGIN*****************************************************
     if (strcmp(request_type, "login") == 0) {
 
       char *username = strtok(NULL, " ");
       char *password = strtok(NULL, " ");
-
+      printf("Username: %s Password: %s \n",username,password);
 
       sprintf(buffer_query, "SELECT * FROM Utente WHERE username='%s' AND password='%s'", username, password);
       pthread_mutex_lock(&conn_mutex);
       PGresult *res = PQexec(conn, buffer_query);
       pthread_mutex_unlock(&conn_mutex);
-      if (PQntuples(res) > 0) {
-     
+     if(PQresultStatus(res) == PGRES_TUPLES_OK && PQntuples(res)==1){
+
         snprintf(buffer_out,sizeof(buffer_out),"%s¶%s¶%s\n","login_success",username,password);
         strcpy(client->username, username);
-        memset(buffer_query, 0, sizeof(buffer_query));
-      } else {
-       
+
+      }else {
         sprintf(buffer_out, "login_failed\n");
-        memset(buffer_query, 0, sizeof(buffer_query));
-      }
+      } 
+      
       PQclear(res);
 
-
+//**********************************************************************SIGN IN*****************************************************
     }else if(strcmp(request_type, "sign_in") == 0) {
 
       char *username = strtok(NULL, " ");
       char *password = strtok(NULL, " ");
 
-      sprintf(buffer_query, "SELECT * FROM Utente WHERE username='%s' AND password='%s'", username, password);
+      snprintf(buffer_query, sizeof(buffer_query), "SELECT * FROM Utente WHERE username='%s'", username);
       pthread_mutex_lock(&conn_mutex);
       PGresult *res = PQexec(conn, buffer_query);
       pthread_mutex_unlock(&conn_mutex);
-      if (PQntuples(res) > 0) {
-
+      if(PQresultStatus(res) == PGRES_TUPLES_OK){
+       if (PQntuples(res) > 0)
+       {
         sprintf(buffer_out, "already_exists\n");
-        memset(buffer_query, 0, sizeof(buffer_query));
+        goto fine;
 
-      }else{
+       }else{
 
-       sprintf(buffer_query, "INSERT INTO Utente (username,password) VALUES ('%s','%s')",username,password);
-       pthread_mutex_lock(&conn_mutex);
-       PGresult *res = PQexec(conn, buffer_query);
-       pthread_mutex_unlock(&conn_mutex);
-       if (PQresultStatus(res) == PGRES_COMMAND_OK) {
-      
+        snprintf(buffer_query, sizeof(buffer_query), "INSERT INTO Utente (username, password) VALUES ('%s', '%s')", username, password);
+        pthread_mutex_lock(&conn_mutex);
+        PGresult *res = PQexec(conn, buffer_query);
+        pthread_mutex_unlock(&conn_mutex);
+       if(PQresultStatus(res) == PGRES_COMMAND_OK)
+        {
         sprintf(buffer_out, "sign_in_success\n");
-        memset(buffer_query, 0, sizeof(buffer_query));
-       } else {
-        printf("Registrazione fallita");
+        PQclear(res);
+        }else {
+
         sprintf(buffer_out, "sign_in_failed\n");
-        memset(buffer_query, 0, sizeof(buffer_query));
+        goto fine;
        }
        
       }
-      PQclear(res);
 
+    }else{
+      sprintf(buffer_out, "sign_in_failed\n");
+      goto fine;
 
+    }
+    fine:
+    PQclear(res);
+
+//**********************************************************************RECUPERO STANZE UTENTE*****************************************************
     } else if (strcmp(request_type, "recupera_chat") == 0) {
 
      snprintf(buffer_query, sizeof(buffer_query),
-"(SELECT  Stanza.nome,Stanza.numero, Messaggio.corpo, Messaggio.tempo_invio, messaggio.mittente "
-"FROM Stanza INNER JOIN utentistanza ON stanza.numero=utentistanza.numerostanza "
-"LEFT JOIN Messaggio ON Stanza.numero = Messaggio.stanza "
-"WHERE utentistanza.username='%s' AND utentistanza.approvato=true AND Messaggio.tempo_invio = (SELECT MAX(tempo_invio) FROM Messaggio WHERE Messaggio.stanza = Stanza.numero) "
-"ORDER BY messaggio.tempo_invio ASC) "
-"union all "
-	"(SELECT  stanza.nome,stanza.numero, messaggio.corpo, messaggio.tempo_invio, messaggio.mittente FROM stanza INNER JOIN utentistanza ON stanza.numero=utentistanza.numerostanza "
-"LEFT JOIN messaggio ON stanza.numero=messaggio.stanza WHERE utentistanza.username='%s' AND utentistanza.approvato=true AND messaggio.corpo is null)", client->username, client->username); 
+     "(SELECT  Stanza.nome,Stanza.numero, Messaggio.corpo, Messaggio.tempo_invio, messaggio.mittente "
+     "FROM Stanza INNER JOIN utentistanza ON stanza.numero=utentistanza.numerostanza "
+     "LEFT JOIN Messaggio ON Stanza.numero = Messaggio.stanza "
+     "WHERE utentistanza.username='%s' AND utentistanza.approvato=true AND Messaggio.tempo_invio = (SELECT MAX(tempo_invio) FROM Messaggio WHERE Messaggio.stanza = Stanza.numero) "
+     "ORDER BY messaggio.tempo_invio ASC) "
+     "union all "
+	   "(SELECT  stanza.nome,stanza.numero, messaggio.corpo, messaggio.tempo_invio, messaggio.mittente FROM stanza INNER JOIN utentistanza ON stanza.numero=utentistanza.numerostanza "
+     "LEFT JOIN messaggio ON stanza.numero=messaggio.stanza WHERE utentistanza.username='%s' AND utentistanza.approvato=true AND messaggio.corpo is null)", client->username, client->username); 
      pthread_mutex_lock(&conn_mutex);
      PGresult *res = PQexec(conn, buffer_query);
      pthread_mutex_unlock(&conn_mutex);
@@ -246,10 +263,10 @@ void *handle_connection(void *arg) {
       }
      PQclear(res);
 
-
+//**********************************************************************RECUPERO STANZE*****************************************************
     } else if (strcmp(request_type, "recupera_all_chat") == 0) {
   
-      snprintf(buffer_query, sizeof(buffer_query),"SELECT s.* FROM Stanza s "); 
+      snprintf(buffer_query, sizeof(buffer_query),"SELECT Stanza.nome,Stanza.numero FROM Stanza "); 
       pthread_mutex_lock(&conn_mutex);
       PGresult *res = PQexec(conn, buffer_query);
       pthread_mutex_unlock(&conn_mutex);
@@ -272,11 +289,12 @@ void *handle_connection(void *arg) {
       }
      PQclear(res);
 
-
+//**********************************************************************CREA STANZA/AGGIUNGI PARTECIPANTI*****************************************************
     }else if (strcmp(request_type, "create_chat_add_users") == 0) {
-     char *request_string = strtok(NULL, "");
-     char *chat_room_name = strtok(request_string, "¶");
-     char *users_list = strtok(NULL, ""); 
+     char *chat_room_name = strtok(NULL, "¶");
+     char *users_list = strtok(NULL, "¶");
+
+     printf("User_list:%s\n char_room_name: %s\n",users_list,chat_room_name);
 
      sprintf(buffer_query, "INSERT INTO Stanza (nome) VALUES ('%s')", chat_room_name);
      pthread_mutex_lock(&conn_mutex);
@@ -285,7 +303,7 @@ void *handle_connection(void *arg) {
      if (PQresultStatus(res) != PGRES_COMMAND_OK) {
  
        sprintf(buffer_out, "create_chat_add_users_failed\n");
-       PQclear(res);
+       goto end;
 
       }else{
         
@@ -302,13 +320,13 @@ void *handle_connection(void *arg) {
        }else{
         printf("Errore recupero codice stanza: %s\n", PQerrorMessage(conn));
         sprintf(buffer_out, "create_chat_add_users_failed\n");
-        continue;
+        goto end;
       }
       PQclear(res);
 
 
      while (username != NULL) {
-        username = strtok(NULL, " ");
+      
 
        sprintf(buffer_query, "INSERT INTO utentistanza (numerostanza, username,approvato) VALUES (%d, '%s',true)", chat_room_number, username);
        pthread_mutex_lock(&conn_mutex);
@@ -318,11 +336,9 @@ void *handle_connection(void *arg) {
        if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 
          sprintf(buffer_out, "create_chat_add_users_failed\n");
-         PQclear(res);
-         break;
+         goto end;
         }
-
-       PQclear(res);
+      username = strtok(NULL, " ");
       }
 
        sprintf(buffer_query, "INSERT INTO utentistanza (numerostanza, username,approvato) VALUES (%d, '%s',true)", chat_room_number, client->username);
@@ -337,25 +353,27 @@ void *handle_connection(void *arg) {
         }else{
 
           sprintf(buffer_query, "UPDATE Stanza SET proprietario='%s' WHERE numero=%d", client->username, chat_room_number);
-
           PGresult *res = PQexec(conn, buffer_query);
+
           if (PQresultStatus(res) != PGRES_COMMAND_OK) {
           printf("Query failed: %s", PQerrorMessage(conn));
           sprintf(buffer_out, "create_chat_add_users_failed\n");
+          goto end;
 
           }else{
 
           sprintf(buffer_out, "create_chat_add_users_success\n");
+          PQclear(res);
 
           }
 
 
         }
       }
-
+      end:
        PQclear(res);
 
-      
+      //**********************************************************************AGGIUNGI PARTECIPANTE*****************************************************
     }else if (strcmp(request_type, "add_user_to_chat") == 0) {
 
 
@@ -371,6 +389,30 @@ void *handle_connection(void *arg) {
 
         sprintf(buffer_out, "user_added_to_chat\n");
 
+        PQclear(res);
+
+        char messaggio[100];
+
+        sprintf(messaggio, "L''utente %s si è unito alla chat", user_to_add);
+        printf("Messaggio: %s, stanza: %d \n",messaggio,stanza_numero);
+        memset(buffer_query,0,sizeof(buffer_query));
+        sprintf(buffer_query, "INSERT INTO messaggio(corpo,tempo_invio,mittente,stanza) VALUES('%s',default,'%s',%d)", messaggio,"system",stanza_numero);
+        
+        pthread_mutex_lock(&conn_mutex);
+        PGresult *res = PQexec(conn, buffer_query);
+        pthread_mutex_unlock(&conn_mutex);
+
+        if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+
+         recupera_partecipanti_connessi(stanza_numero,client,buffer_query,buffer_out);
+         manda_messaggio_sistema(messaggio,client);
+         esci_stanza(client);
+
+        } else {
+
+         sprintf(buffer_out, "add_user_failed\n");
+        }
+       
        }else{
 
         sprintf(buffer_out, "add_user_failed\n");
@@ -379,7 +421,7 @@ void *handle_connection(void *arg) {
 
      PQclear(res);
 
-
+//**********************************************************************RIFIUTA RICHIESTA PARTECIPAZIONE*****************************************************
     }else if (strcmp(request_type, "delete_request_user") == 0) {
 
      int stanza_numero = atoi(strtok(NULL, " "));
@@ -402,7 +444,7 @@ void *handle_connection(void *arg) {
 
      PQclear(res);
 
-
+//**********************************************************************VERIFICA ESISTENZA UTENTE*****************************************************
     }else if (strcmp(request_type, "check_user")==0){
       char *username = strtok(NULL, " ");
 
@@ -414,15 +456,13 @@ void *handle_connection(void *arg) {
      
         sprintf(buffer_out, "user_found¶");
         sprintf(buffer_out + strlen(buffer_out), "%s\n",username);
-        memset(buffer_query, 0, sizeof(buffer_query));
       } else {
        
         sprintf(buffer_out, "user_not_found\n");
-        memset(buffer_query, 0, sizeof(buffer_query));
       }
       PQclear(res);
 
-
+//**********************************************************************INVIA RICHIESTA PARTECIPAZIONE*****************************************************
     }else if (strcmp(request_type, "invia_richiesta")==0){
 
      int stanza_numero = atoi(strtok(NULL, " "));
@@ -476,7 +516,7 @@ void *handle_connection(void *arg) {
      }
      PQclear(res);
 
-
+//**********************************************************************RECUPERA RICHIESTE PARTECIPAZIONE*****************************************************
     }else if (strcmp(request_type, "recupera_richieste")==0){
 
         sprintf(buffer_query,"SELECT utente.username, stanza.nome, stanza.numero FROM utente, stanza, utentistanza WHERE utente.username=utentistanza.username AND stanza.numero=utentistanza.numerostanza AND stanza.proprietario='%s' AND utentistanza.approvato=false",client->username);
@@ -506,17 +546,17 @@ void *handle_connection(void *arg) {
         
         PQclear(res);
 
-
+//**********************************************************************RECUPERA MESSAGGI*****************************************************
     }else if (strcmp(request_type, "recupera_messaggi")==0){
 
      int codice_chat = atoi(strtok(NULL, " "));
-     sprintf(buffer_query, "SELECT Messaggio.corpo, Messaggio.tempo_invio, Messaggio.mittente FROM Messaggio WHERE stanza='%d'", codice_chat);\
+     sprintf(buffer_query, "SELECT Messaggio.corpo, Messaggio.tempo_invio, Messaggio.mittente FROM Messaggio WHERE stanza='%d' order by tempo_invio", codice_chat);
 
      pthread_mutex_lock(&conn_mutex);
      PGresult *res = PQexec(conn, buffer_query);
      pthread_mutex_unlock(&conn_mutex);
 
-     if (PQresultStatus(res) == PGRES_TUPLES_OK) {
+    if (PQresultStatus(res) == PGRES_TUPLES_OK) {
      int num_tuple = PQntuples(res);
 
       client->stanza_numero = codice_chat;
@@ -532,13 +572,41 @@ void *handle_connection(void *arg) {
         strcat(buffer_out, "\n");
 
       }else {
-      sprintf(buffer_out, "no_message_found\n");
+      printf("No message found");
       }
+      
+    }
+
+      PQclear(res);
+      
+//**********************************************************************ABBANDONA STANZA*****************************************************
+    }else if (strcmp(request_type, "leave_chat")==0){
+      esci_stanza(client);
+
+//**********************************************************************INVIA MESSAGGIO*****************************************************
+    }else if (strcmp(request_type, "send_message") == 0) {
+      char *messaggio = strtok(NULL, "¶");
+      printf("Messaggio: %s \n",messaggio);
+      sprintf(buffer_query, "INSERT INTO messaggio(corpo,tempo_invio,mittente,stanza) VALUES('%s',default,'%s','%d')", messaggio, client->username, client->stanza_numero);
+ 
+      PGresult *res = PQexec(conn, buffer_query);
+      if (PQresultStatus(res) == PGRES_COMMAND_OK) {
+        
+        recupera_partecipanti_connessi(client->stanza_numero,client,buffer_query,buffer_out);
+        manda_messaggio(messaggio,client);
+        sprintf(buffer_out + strlen(buffer_out), "send_message_success¶%s¶\n",messaggio);
+
+      } else {
+
+        sprintf(buffer_out, "send_message_failed\n");
+      }
+      PQclear(res);
 
 
-      PQclear(res); 
-
-      sprintf(buffer_query,"SELECT username FROM utentistanza WHERE numerostanza='%d' AND approvato=true AND username != '%s'",codice_chat,client->username);
+//**********************************************************************RECUPERO UTENTI*****************************************************
+    }else if (strcmp(request_type, "retrieval_users") == 0) {
+     char user_list[MAX_CLIENT * (USER_LUN + 1)] = ""; 
+      sprintf(buffer_query,"SELECT username FROM utentistanza WHERE numerostanza='%d' AND approvato=true AND username != '%s'",client->stanza_numero,client->username);
       pthread_mutex_lock(&conn_mutex);
       PGresult *res = PQexec(conn, buffer_query);
       pthread_mutex_unlock(&conn_mutex);
@@ -548,99 +616,33 @@ void *handle_connection(void *arg) {
 
         int n_rows = PQntuples(res);
          for (int i = 0; i < n_rows; i++)
-         {       
-            struct Client *partecipante = malloc(sizeof(struct Client));
-            char *strtemp=PQgetvalue(res,i,0);
-            strcpy(partecipante->username, strtemp);
-            printf("L'username di partecipante è : %s \n ", partecipante->username);
-            client->partecipanti[i] = partecipante;
-         }
+         { 
+          char* nome = PQgetvalue(res,i,0);
+          strcat(user_list,nome);
+          strcat(user_list, "¶");  
+         }  
 
-         struct NodoLista *current = head;
-         while (current != NULL)
-         {
-          struct Client *utente = current->client;
-          for (int i = 0; i < n_rows; i++)
-          {
-           if (strcmp(utente->username, client->partecipanti[i]->username) == 0)
-           {
-            client->partecipanti[i]->sd = utente->sd;
-            printf("Sono nell'if, il valore di client->partecipanti->sd : %d, l'username è: %s \n",client->partecipanti[i]->sd,client->partecipanti[i]->username);
-            }
-          }
-         current = current->succ;
-         }
+      strcat(user_list,"\n");
+      sprintf(buffer_out, "retrieval_users_success¶%s\n", user_list);
 
-      }else{
-        sprintf(buffer_out, "retrieval_users_failed\n");
+    }else{
+      sprintf(buffer_out, "retrieval_users_failed");
 
-      } 
-      PQclear(res); 
-
-     } else{
-      sprintf(buffer_out, "retrieval_message_failed\n");
-     }
-    for(int i=0;i<MAX_CLIENT;i++){
-      printf("Partecipante: %s \n", client->partecipanti[i]->username);
     }
-  
 
-    }else if (strcmp(request_type, "leave_chat")==0){
-      client->stanza_numero = -1;
+  }
 
-      for(int i=0; i<MAX_CLIENT; i++)
-      {
-      client->partecipanti[i] = NULL;
-      }
-
-
-    }else if (strcmp(request_type, "send_message") == 0) {
-      
-      char *messaggio;
-      char *buffer_messaggio = malloc(100);
-      int dim_buffer = 100; 
-      int dim_messaggio = 0; 
-
-      while ((messaggio = strtok(NULL, "\n")) != NULL) {
-         dim_messaggio += strlen(messaggio);  
-         if (dim_messaggio >= dim_buffer) {  
-            dim_buffer *= 2;  
-            buffer_messaggio = realloc(buffer_messaggio, dim_buffer); 
-         }
-         strcat(buffer_messaggio, messaggio);  
-      }
-
-      sprintf(buffer_query, "INSERT INTO messaggio (corpo, tempo_invio, mittente, stanza) VALUES ('%s', 'NOW()', '%s', '%d')", buffer_messaggio, client->username, client->stanza_numero);
- 
-      PGresult *res = PQexec(conn, buffer_query);
-      if (PQresultStatus(res) == PGRES_COMMAND_OK) {
-
-
-        manda_messaggio(buffer_messaggio,client);
-        sprintf(buffer_out,"send_message_success\n");
-
-      } else {
-
-        sprintf(buffer_out, "send_message_failed\n");
-      }
-      PQclear(res);
-
-    } else {
-
-      sprintf(buffer_out, "invalid_request\n");
+////////////////////////////////////////////////////////////////////////////////////////////////
+    else {
+      fprintf(stderr,"Errore lettura da client: %s\n",strerror(errno));
     }
 
 
     send(client->sd, buffer_out, strlen(buffer_out), 0);
-    /*while(1){
-      int n = send(client->sd, buffer_out, strlen(buffer_out), 0);
-      if(n < 0){
-        perror("Errore invio dati al client");
-        continue;
-      }
 
-      break;
-    } può dare problemi(?)*/ 
+    memset(buffer_in, 0, sizeof(buffer_in));
+    memset(buffer_out, 0, sizeof(buffer_out));
+    memset(buffer_query, 0, sizeof(buffer_query));
 
 
   }
@@ -648,7 +650,6 @@ void *handle_connection(void *arg) {
   printf("%s esce dall'applicazione\n",client->username);
   rimuovi_client(client);
   close(client->sd);
-  free(client);
   pthread_exit(0);
   
 
@@ -698,42 +699,121 @@ void rimuovi_client(struct Client *c) {
 }
 
 
+//////////////////////GESTIONE INVIO MESSAGGI/////////////////////////////
 
 void manda_messaggio(char *msg, struct Client *client){
   pthread_mutex_lock(&clients_mutex);
 
+  char messaggio[500];
+  strcpy(messaggio, "received_message¶");
+  strcat(messaggio, client->username);
+  strcat(messaggio, "¶");
+  strcat(messaggio, msg);
+  strcat(messaggio, "\n");
+  
   int i = 0;
-  while(client->partecipanti[i] != NULL) {
-   send(client->partecipanti[i]->sd, msg, strlen(msg), 0);
-   i++;
+  while (client->partecipanti[i] != NULL) {
+    printf("utente %s invia messaggio %s a %s \n",client->username,messaggio,client->partecipanti[i]->username);
+    send(client->partecipanti[i]->sd, messaggio, strlen(messaggio), 0);
+    i++;
   }
 
   pthread_mutex_unlock(&clients_mutex);
 }
 
 
+void manda_messaggio_sistema(char *msg, struct Client *client){
+  pthread_mutex_lock(&clients_mutex);
 
-void retrieve_users_from_room(const char *room_name, struct Client *c) {
-    char query[DIM_BUFF];
-    int num_rows, i;
+  char messaggio[500];
 
-    sprintf(query, "SELECT username FROM users WHERE room = '%s'", room_name);
+  strcpy(messaggio, "received_message¶");
+  strcat(messaggio, "system");
+  strcat(messaggio, "¶");
+  strcat(messaggio, msg);
+  strcat(messaggio, "\n");
+  
+  int i = 0;
+  while (client->partecipanti[i] != NULL) {
+    printf("Invio il messaggio %s all'utente %s",messaggio,client->partecipanti[i]->username);
+    send(client->partecipanti[i]->sd, messaggio, strlen(messaggio), 0);
+    i++;
+  }
 
-    pthread_mutex_lock(&conn_mutex);
-    PGresult *res = PQexec(conn, query);
-    pthread_mutex_unlock(&conn_mutex);
-
-    if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-        printf("Errore nella query: %s\n", PQerrorMessage(conn));
-        return;
-    }
-
-    num_rows = PQntuples(res);
-
-    for (i = 0; i < num_rows; i++) {
-        char *username = PQgetvalue(res, i, 0);
-        c->partecipanti[i] = (struct Client *) malloc(sizeof(struct Client));
-        strcpy(c->partecipanti[i]->username, username);
-    }
-    PQclear(res);
+  pthread_mutex_unlock(&clients_mutex);
 }
+
+
+void recupera_partecipanti_connessi(int room_id, struct Client *client, char *buffer_query, char *buffer_out){
+      pthread_mutex_lock(&clients_mutex);
+       for (int i = 0; i < MAX_CLIENT; i++){client->partecipanti[i] = NULL;}
+      sprintf(buffer_query,"SELECT username FROM utentistanza WHERE numerostanza='%d' AND approvato=true AND username != '%s'",room_id,client->username);
+      pthread_mutex_lock(&conn_mutex);
+      PGresult *res = PQexec(conn, buffer_query);
+      pthread_mutex_unlock(&conn_mutex);
+
+      if (PQresultStatus(res) == PGRES_TUPLES_OK)
+      {
+
+        int n_rows = PQntuples(res);
+         for (int i = 0; i < n_rows; i++)
+         {       
+            struct Client *partecipante = malloc(sizeof(struct Client));
+            char *strtemp=PQgetvalue(res,i,0);
+            strcpy(partecipante->username, strtemp);
+
+            printf("L'username di partecipante è : %s \n ", partecipante->username);
+
+            client->partecipanti[i] = partecipante;
+
+            printf("L'username del partecipante salvato in client è: %s \n",client->partecipanti[i]->username);
+         }
+
+         struct NodoLista *current = head;
+         while (current != NULL)
+         {
+          struct Client *utente = current->client;
+          for (int i = 0; i < n_rows; i++)
+          {
+            printf("Utente->stanza_numero: %d, Client->stanza_numero: %d, Partecipante: %s, utente->username: %s \n",utente->stanza_numero,client->stanza_numero,client->partecipanti[i]->username, utente->username);
+        
+          if(client->partecipanti[i]!=NULL){
+
+           if ((client->partecipanti[i]!=NULL) && (strcmp(utente->username,client->partecipanti[i]->username)== 0) && (utente->stanza_numero==client->stanza_numero))
+           {
+            client->partecipanti[i]->sd = utente->sd;
+            client->partecipanti[i]->stanza_numero=utente->stanza_numero;
+            printf("Sono nell'if, il valore di client->partecipanti->sd : %d, l'username è: %s \n",client->partecipanti[i]->sd,client->partecipanti[i]->username);
+            }
+          }
+          }
+         current = current->succ;
+         }
+
+         for(int i=0;i<MAX_CLIENT;i++){
+          printf("partecipante[%d]: %s \n",i,client->partecipanti[i]->username);
+         }
+
+      }else{
+        sprintf(buffer_out, "retrieval_users_failed\n");
+
+      } 
+
+      PQclear(res);
+    pthread_mutex_unlock(&clients_mutex);
+}
+
+void esci_stanza(struct Client *client){
+  pthread_mutex_lock(&clients_mutex);
+
+      client->stanza_numero = -1;
+
+      for(int i=0; i<MAX_CLIENT; i++)
+      {
+      client->partecipanti[i] = NULL;
+      }
+    pthread_mutex_unlock(&clients_mutex);
+}
+
+
+

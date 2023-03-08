@@ -6,15 +6,17 @@
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable-v24/bckgrd_chat_input.xml" value="0.171" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable-v24/bckgrd_content_top.xml" value="0.171" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable-v24/bckgrd_recive_message.xml" value="0.197" />
+        <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable-v24/bckgrd_sent_message.xml" value="0.274" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable-v24/btn_blue.xml" value="0.171" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable-v24/red_bord.xml" value="0.171" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable-v24/vie_bg.xml" value="0.171" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable/bottone_trasparente.xml" value="0.197" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable/btn_bordwhite.xml" value="0.171" />
+        <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable/gradient_animation.xml" value="0.274" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable/ic_baseline_password_24.xml" value="0.197" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable/ic_launcher_background.xml" value="0.171" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/drawable/style_popup.xml" value="0.171" />
-        <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/layout/activity_chat.xml" value="0.33" />
+        <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/layout/activity_chat.xml" value="0.25" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/layout/activity_creazionegruppo.xml" value="0.25" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/layout/activity_listachat.xml" value="0.25416666666666665" />
         <entry key="..\:/Progetti_Github/LSO_Chat/ChatRoomProject/Android/app/src/main/res/layout/activity_login.xml" value="0.25416666666666665" />
